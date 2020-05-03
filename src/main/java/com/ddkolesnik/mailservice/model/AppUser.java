@@ -16,7 +16,7 @@ import javax.persistence.Table;
 
 @Data
 @Entity
-@Table(name = "app_user")
+@Table(name = "USERS")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AppUser {
 
