@@ -1,5 +1,6 @@
 package com.ddkolesnik.mailservice.service;
 
+import com.ddkolesnik.mailservice.dto.AppUserDTO;
 import com.ddkolesnik.mailservice.model.AppMessage;
 import com.ddkolesnik.mailservice.model.AppUser;
 import com.ddkolesnik.mailservice.repository.AppMessageRepository;
@@ -48,28 +49,20 @@ public class AppMessageService {
     final MailSenderService mailSender;
 
     /**
-     * Отправка сообщения по ID пользователя
+     * Отправка сообщения пользователю
      *
-     * @param userId - id пользователя кому отправить сообщение
-     * @return - отправленное сообщение
+     * @param userDTO - DTO пользователя
      */
-    public AppMessage sendWelcomeMessage(Long userId) {
-        AppUser recipient = appUserService.findById(userId);
-        return sendMessage(recipient);
+    public void sendWelcomeMessage(AppUserDTO userDTO) {
+        sendWelcomeMessage(userDTO.getEmail());
     }
 
-    /**
-     * Отправка сообщения на email пользователя
-     *
-     * @param email - email для отправки
-     * @return - отправленное сообщение
-     */
-    public AppMessage sendWelcomeMessage(String email) {
+    private void sendWelcomeMessage(String email) {
         AppUser recipient = appUserService.findByEmail(email);
-        return sendMessage(recipient);
+        sendMessage(recipient);
     }
 
-    private AppMessage sendMessage(AppUser recipient) {
+    private void sendMessage(AppUser recipient) {
         String uuid = UUID.randomUUID().toString().substring(0, 8);
         AppMessage message = new AppMessage();
         message.setSender(KOLESNIK_EMAIL);
@@ -88,7 +81,6 @@ public class AppMessageService {
         appMessageRepository.save(message);
         recipient.setPassword(password);
         appUserService.update(recipient);
-        return message;
     }
 
 }
