@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -49,11 +50,16 @@ public class AppUserService {
      */
     @Transactional(readOnly = true)
     public AppUser findByEmail(String email) {
-        AppUser user = appUserRepository.findByEmail(email);
-        if (Objects.isNull(user)) {
+        List<AppUser> users = appUserRepository.findByEmail(email);
+        if (users.size() > 0) {
+            AppUser user = users.get(0);
+            if (Objects.isNull(user)) {
+                throw new EntityNotFoundException("Пользователь с email = [" + email + "] не найден");
+            }
+            return user;
+        } else {
             throw new EntityNotFoundException("Пользователь с email = [" + email + "] не найден");
         }
-        return user;
     }
 
     /**
