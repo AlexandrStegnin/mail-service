@@ -36,7 +36,7 @@ public class AppUserService {
     @Transactional(readOnly = true)
     public AppUser findById(Long userId) {
         Optional<AppUser> user = appUserRepository.findById(userId);
-        if (user.isEmpty()) {
+        if (!user.isPresent()) {
             throw new EntityNotFoundException("Пользователь с id = [" + userId + "] не найден");
         }
         return user.get();
