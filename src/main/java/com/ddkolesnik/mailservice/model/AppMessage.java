@@ -19,9 +19,9 @@ import java.time.LocalDateTime;
 public class AppMessage {
 
     @Id
-    @TableGenerator(name = "appMessageSeqStore", table = "seq_store",
-            pkColumnName = "seq_name", pkColumnValue = "APP.MESSAGE.ID.PK",
-            valueColumnName = "seq_value", allocationSize = 1)
+    @TableGenerator(name = "appMessageSeqStore", table = "SEQ_STORE",
+            pkColumnName = "SEQ_NAME", pkColumnValue = "APP.MESSAGE.ID.PK",
+            valueColumnName = "SEQ_VALUE", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "appMessageSeqStore")
     @Column(name = "id", updatable = false, nullable = false)
     Long id;
