@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -83,4 +84,29 @@ public class AppMessageService {
         appUserService.update(recipient);
     }
 
+    /**
+     * Отправить приветственное сообщение пользователю
+     *
+     * @param message - сообщение
+     */
+    public void sendWelcomeMessage(AppMessage message) {
+        AppUser user = appUserService.findById(message.getUserId());
+        try {
+            mailSender.sendWelcomeMessage(message.getSender(), user.getEmail(),
+                    message.getSubject(), message.getText(), "Доходный Дом Колесникъ");
+            message.setError(null);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            message.setError(e.getLocalizedMessage());
+        }
+        appMessageRepository.save(message);
+    }
+
+    /**
+     * Получить список сообщений, которые содержат ошибки и не отправлены
+     *
+     * @return - список сообщений
+     */
+    public List<AppMessage> getNotSent() {
+        return appMessageRepository.findByErrorNotNull();
+    }
 }
