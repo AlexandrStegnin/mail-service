@@ -73,7 +73,7 @@ public class AppMessageService {
         message.setText(text);
         message.setSubject("Добро пожаловать в Доходный Дом Колесникъ!");
         try {
-            mailSender.sendWelcomeMessage(message.getSender(), recipient.getEmail(),
+            mailSender.sendWelcomeMessage(message.getSender(), recipient.getProfile().getEmail(),
                     message.getSubject(), message.getText(), "Доходный Дом Колесникъ");
         } catch (MessagingException | UnsupportedEncodingException e) {
             message.setError(e.getLocalizedMessage());
@@ -92,7 +92,7 @@ public class AppMessageService {
     public void sendWelcomeMessage(AppMessage message) {
         AppUser user = appUserService.findById(message.getUserId());
         try {
-            mailSender.sendWelcomeMessage(message.getSender(), user.getEmail(),
+            mailSender.sendWelcomeMessage(message.getSender(), user.getProfile().getEmail(),
                     message.getSubject(), message.getText(), "Доходный Дом Колесникъ");
             message.setError(null);
         } catch (MessagingException | UnsupportedEncodingException e) {
