@@ -5,10 +5,7 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * @author Alexandr Stegnin
@@ -33,4 +30,6 @@ public class AppUser {
     @Column(name = "password")
     String password;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    UserProfile profile;
 }
