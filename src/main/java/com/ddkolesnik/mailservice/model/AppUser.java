@@ -23,9 +23,6 @@ public class AppUser {
     @Column(name = "login")
     String login;
 
-    @Column(name = "email")
-    String email;
-
     @JsonIgnore
     @Column(name = "password")
     String password;
