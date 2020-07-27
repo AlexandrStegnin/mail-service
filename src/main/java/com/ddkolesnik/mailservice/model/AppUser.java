@@ -13,7 +13,7 @@ import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name = "USERS")
+@Table(name = "app_user")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AppUser {
 
