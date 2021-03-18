@@ -20,7 +20,7 @@ import java.util.Properties;
  */
 
 @Configuration
-@PropertySource("classpath:office365.mail.properties")
+@PropertySource("classpath:yandex.mail.properties")
 public class AppConfig {
 
     private static final String ENCODING = StandardCharsets.UTF_8.name();
