@@ -32,81 +32,81 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AppMessageService {
 
-    static String KOLESNIK_EMAIL;
+  static String KOLESNIK_EMAIL;
 
-    @Value("${spring.mail.kolesnik.username}")
-    protected void setKolesnikEmail(String value) {
-        KOLESNIK_EMAIL = value;
+  @Value("${spring.mail.kolesnik.username}")
+  protected void setKolesnikEmail(String value) {
+    KOLESNIK_EMAIL = value;
+  }
+
+  final SimpleMailMessage template;
+
+  final BCryptPasswordEncoder passwordEncoder;
+
+  final AppMessageRepository appMessageRepository;
+
+  final AppUserService appUserService;
+
+  final MailSenderService mailSender;
+
+  /**
+   * Отправка сообщения пользователю
+   *
+   * @param userDTO - DTO пользователя
+   */
+  public void sendWelcomeMessage(AppUserDTO userDTO) {
+    sendWelcomeMessage(userDTO.getEmail());
+  }
+
+  private void sendWelcomeMessage(String email) {
+    AppUser recipient = appUserService.findByEmail(email);
+    sendMessage(recipient);
+  }
+
+  private void sendMessage(AppUser recipient) {
+    String uuid = UUID.randomUUID().toString().substring(0, 8);
+    AppMessage message = new AppMessage();
+    message.setSender(KOLESNIK_EMAIL);
+    String password = passwordEncoder.encode(uuid);
+    String text = String.format(Objects.requireNonNull(template.getText()), uuid);
+    message.setUserId(recipient.getId());
+    message.setText(text);
+    message.setSubject("Добро пожаловать в \"Колесник.Инвестиции\"!");
+    try {
+      mailSender.sendWelcomeMessage(message.getSender(), recipient.getProfile().getEmail(),
+          message.getSubject(), message.getText(), "Колесник.Инвестиции");
+    } catch (MessagingException | UnsupportedEncodingException e) {
+      message.setError(e.getLocalizedMessage());
     }
+    message.setSentAt(LocalDateTime.now());
+    appMessageRepository.save(message);
+    recipient.setPassword(password);
+    appUserService.update(recipient);
+  }
 
-    final SimpleMailMessage template;
-
-    final BCryptPasswordEncoder passwordEncoder;
-
-    final AppMessageRepository appMessageRepository;
-
-    final AppUserService appUserService;
-
-    final MailSenderService mailSender;
-
-    /**
-     * Отправка сообщения пользователю
-     *
-     * @param userDTO - DTO пользователя
-     */
-    public void sendWelcomeMessage(AppUserDTO userDTO) {
-        sendWelcomeMessage(userDTO.getEmail());
+  /**
+   * Отправить приветственное сообщение пользователю
+   *
+   * @param message - сообщение
+   */
+  public void sendWelcomeMessage(AppMessage message) {
+    AppUser user = appUserService.findById(message.getUserId());
+    try {
+      mailSender.sendWelcomeMessage(message.getSender(), user.getProfile().getEmail(),
+          message.getSubject(), message.getText(), "Доходный Дом Колесникъ");
+      message.setError(null);
+    } catch (MessagingException | UnsupportedEncodingException e) {
+      message.setError(e.getLocalizedMessage());
     }
+    appMessageRepository.save(message);
+  }
 
-    private void sendWelcomeMessage(String email) {
-        AppUser recipient = appUserService.findByEmail(email);
-        sendMessage(recipient);
-    }
-
-    private void sendMessage(AppUser recipient) {
-        String uuid = UUID.randomUUID().toString().substring(0, 8);
-        AppMessage message = new AppMessage();
-        message.setSender(KOLESNIK_EMAIL);
-        String password = passwordEncoder.encode(uuid);
-        String text = String.format(Objects.requireNonNull(template.getText()), recipient.getLogin(), uuid);
-        message.setUserId(recipient.getId());
-        message.setText(text);
-        message.setSubject("Добро пожаловать в Доходный Дом Колесникъ!");
-        try {
-            mailSender.sendWelcomeMessage(message.getSender(), recipient.getProfile().getEmail(),
-                    message.getSubject(), message.getText(), "Доходный Дом Колесникъ");
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            message.setError(e.getLocalizedMessage());
-        }
-        message.setSentAt(LocalDateTime.now());
-        appMessageRepository.save(message);
-        recipient.setPassword(password);
-        appUserService.update(recipient);
-    }
-
-    /**
-     * Отправить приветственное сообщение пользователю
-     *
-     * @param message - сообщение
-     */
-    public void sendWelcomeMessage(AppMessage message) {
-        AppUser user = appUserService.findById(message.getUserId());
-        try {
-            mailSender.sendWelcomeMessage(message.getSender(), user.getProfile().getEmail(),
-                    message.getSubject(), message.getText(), "Доходный Дом Колесникъ");
-            message.setError(null);
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            message.setError(e.getLocalizedMessage());
-        }
-        appMessageRepository.save(message);
-    }
-
-    /**
-     * Получить список сообщений, которые содержат ошибки и не отправлены
-     *
-     * @return - список сообщений
-     */
-    public List<AppMessage> getNotSent() {
-        return appMessageRepository.findByErrorNotNull();
-    }
+  /**
+   * Получить список сообщений, которые содержат ошибки и не отправлены
+   *
+   * @return - список сообщений
+   */
+  public List<AppMessage> getNotSent() {
+    return appMessageRepository.findByErrorNotNull();
+  }
 }
