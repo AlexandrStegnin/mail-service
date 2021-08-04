@@ -68,7 +68,7 @@ public class AppMessageService {
     AppMessage message = new AppMessage();
     message.setSender(KOLESNIK_EMAIL);
     String password = passwordEncoder.encode(uuid);
-    String text = String.format(Objects.requireNonNull(template.getText()), uuid);
+    String text = String.format(Objects.requireNonNull(template.getText()), recipient.getLogin(), uuid);
     message.setUserId(recipient.getId());
     message.setText(text);
     message.setSubject("Добро пожаловать в \"Колесник.Инвестиции\"!");
