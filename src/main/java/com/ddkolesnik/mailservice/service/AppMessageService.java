@@ -71,10 +71,10 @@ public class AppMessageService {
     String text = String.format(Objects.requireNonNull(template.getText()), recipient.getLogin(), uuid);
     message.setUserId(recipient.getId());
     message.setText(text);
-    message.setSubject("Добро пожаловать в \"Колесник.Инвестиции\"!");
+    message.setSubject("Добро пожаловать в Доходный Дом КолесникЪ!");
     try {
       mailSender.sendWelcomeMessage(message.getSender(), recipient.getProfile().getEmail(),
-          message.getSubject(), message.getText(), "Колесник.Инвестиции");
+          message.getSubject(), message.getText(), "ДД КолесникЪ");
     } catch (MessagingException | UnsupportedEncodingException e) {
       message.setError(e.getLocalizedMessage());
     }
