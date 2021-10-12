@@ -32,12 +32,8 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AppMessageService {
 
-  static String kolesnikEmail;
-
   @Value("${spring.mail.kolesnik.username}")
-  protected void setKolesnikEmail(String value) {
-    kolesnikEmail = value;
-  }
+  String kolesnikEmail;
 
   final SimpleMailMessage welcomeMessageTemplate;
 

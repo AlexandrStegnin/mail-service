@@ -1,5 +1,7 @@
 package com.ddkolesnik.mailservice.config;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,66 +22,35 @@ import java.util.Properties;
  */
 
 @Configuration
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @PropertySource("classpath:yandex.mail.properties")
 public class AppConfig {
 
-  private static final String ENCODING = StandardCharsets.UTF_8.name();
-
-  private static String host;
-
-  private static Integer port;
-
-  private static String protocol;
-
-  private static String smtpAuth;
-
-  private static String smtpStarttlsEnable;
-
-  private static String debugEnable;
-
-  private static String welcomeUsername;
-
-  private static String welcomePassword;
+  static final String ENCODING = StandardCharsets.UTF_8.name();
 
   @Value("${spring.mail.host}")
-  protected void setHost(String value) {
-    host = value;
-  }
+  String host;
 
   @Value("${spring.mail.port}")
-  protected void setPort(Integer value) {
-    port = value;
-  }
+  Integer port;
 
   @Value("${spring.mail.protocol}")
-  protected void setProtocol(String value) {
-    protocol = value;
-  }
+  String protocol;
 
   @Value("${spring.mail.smtp.auth}")
-  protected void setSmtpAuth(String value) {
-    smtpAuth = value;
-  }
+  String smtpAuth;
 
   @Value("${spring.mail.smtp.starttls.enable}")
-  protected void setSmtpStarttlsEnable(String value) {
-    smtpStarttlsEnable = value;
-  }
+  String smtpStarttlsEnable;
 
   @Value("${spring.mail.debug}")
-  protected void setDebugEnable(String value) {
-    debugEnable = value;
-  }
+  String debugEnable;
 
   @Value("${spring.mail.kolesnik.username}")
-  protected void setWelcomeUsername(String value) {
-    welcomeUsername = value;
-  }
+  String welcomeUsername;
 
   @Value("${spring.mail.kolesnik.password}")
-  protected void setWelcomePassword(String value) {
-    welcomePassword = value;
-  }
+  String welcomePassword;
 
   @Bean
   @Qualifier("welcomeSender")
