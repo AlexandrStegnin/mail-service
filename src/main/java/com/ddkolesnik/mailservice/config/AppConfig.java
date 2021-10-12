@@ -25,66 +25,66 @@ public class AppConfig {
 
   private static final String ENCODING = StandardCharsets.UTF_8.name();
 
-  private static String HOST;
+  private static String host;
 
-  private static Integer PORT;
+  private static Integer port;
 
-  private static String PROTOCOL;
+  private static String protocol;
 
-  private static String SMTP_AUTH;
+  private static String smtpAuth;
 
-  private static String SMTP_STARTTLS_ENABLE;
+  private static String smtpStarttlsEnable;
 
-  private static String DEBUG_ENABLE;
+  private static String debugEnable;
 
-  private static String WELCOME_USERNAME;
+  private static String welcomeUsername;
 
-  private static String WELCOME_PASSWORD;
+  private static String welcomePassword;
 
   @Value("${spring.mail.host}")
   protected void setHost(String value) {
-    HOST = value;
+    host = value;
   }
 
   @Value("${spring.mail.port}")
   protected void setPort(Integer value) {
-    PORT = value;
+    port = value;
   }
 
   @Value("${spring.mail.protocol}")
   protected void setProtocol(String value) {
-    PROTOCOL = value;
+    protocol = value;
   }
 
   @Value("${spring.mail.smtp.auth}")
   protected void setSmtpAuth(String value) {
-    SMTP_AUTH = value;
+    smtpAuth = value;
   }
 
   @Value("${spring.mail.smtp.starttls.enable}")
   protected void setSmtpStarttlsEnable(String value) {
-    SMTP_STARTTLS_ENABLE = value;
+    smtpStarttlsEnable = value;
   }
 
   @Value("${spring.mail.debug}")
   protected void setDebugEnable(String value) {
-    DEBUG_ENABLE = value;
+    debugEnable = value;
   }
 
   @Value("${spring.mail.kolesnik.username}")
   protected void setWelcomeUsername(String value) {
-    WELCOME_USERNAME = value;
+    welcomeUsername = value;
   }
 
   @Value("${spring.mail.kolesnik.password}")
   protected void setWelcomePassword(String value) {
-    WELCOME_PASSWORD = value;
+    welcomePassword = value;
   }
 
   @Bean
   @Qualifier("welcomeSender")
   public JavaMailSender getWelcomeSender() {
-    return createMailSender(WELCOME_USERNAME, WELCOME_PASSWORD);
+    return createMailSender(welcomeUsername, welcomePassword);
   }
 
   @Bean
@@ -97,20 +97,21 @@ public class AppConfig {
     System.setProperty("mail.mime.encodeparameters", "false");
 
     JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-    mailSender.setHost(HOST);
-    mailSender.setPort(PORT);
-    mailSender.setProtocol(PROTOCOL);
+    mailSender.setHost(host);
+    mailSender.setPort(port);
+    mailSender.setProtocol(protocol);
     mailSender.setUsername(username);
     mailSender.setPassword(password);
 
     Properties props = mailSender.getJavaMailProperties();
-    props.put("mail.smtp.auth", SMTP_AUTH);
-    props.put("mail.smtp.starttls.enable", SMTP_STARTTLS_ENABLE);
-    props.put("mail.debug", DEBUG_ENABLE);
+    props.put("mail.smtp.auth", smtpAuth);
+    props.put("mail.smtp.starttls.enable", smtpStarttlsEnable);
+    props.put("mail.debug", debugEnable);
     props.put("mail.mime.charset", ENCODING);
 
     Session emailSession = Session.getInstance(mailSender.getJavaMailProperties(),
         new javax.mail.Authenticator() {
+          @Override
           protected PasswordAuthentication getPasswordAuthentication() {
             return new PasswordAuthentication(
                 mailSender.getUsername(), mailSender.getPassword());
@@ -121,7 +122,8 @@ public class AppConfig {
   }
 
   @Bean
-  public SimpleMailMessage templateSimpleMessage() {
+  @Qualifier("welcomeMessageTemplate")
+  public SimpleMailMessage welcomeMessageTemplate() {
     SimpleMailMessage message = new SimpleMailMessage();
     message.setText(
         "Здравствуйте, уважаемый Инвестор!<br/>" +
@@ -129,6 +131,18 @@ public class AppConfig {
             "Данные для входа:<br/><br/>" +
             "login: %s<br/>" +
             "Пароль: %s<br/><br/>" +
+            "С уважением, \"Колесник.Инвестиции\"");
+    return message;
+  }
+
+  @Bean
+  @Qualifier("confirmMessageTemplate")
+  public SimpleMailMessage confirmMessageTemplate() {
+    SimpleMailMessage message = new SimpleMailMessage();
+    message.setText(
+        "Здравствуйте, уважаемый Инвестор!<br/>" +
+            "Ваш код подтверждения %s<br/>" +
+            "Если Вы не запрашивали код подтверждения, то просто проигнорируйте сообщение<br/>" +
             "С уважением, \"Колесник.Инвестиции\"");
     return message;
   }

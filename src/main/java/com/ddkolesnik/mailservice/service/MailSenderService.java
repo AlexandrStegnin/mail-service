@@ -50,4 +50,8 @@ public class MailSenderService {
         sendMessage(from, to, subject, text, personal, sender);
     }
 
+    public void sendConfirmMessage(String from, String to, String subject, String text, String personal) throws MessagingException, UnsupportedEncodingException {
+        sendMessage(from, to, subject, text, personal, sender);
+    }
+
 }

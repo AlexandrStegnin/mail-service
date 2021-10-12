@@ -7,6 +7,8 @@ import com.ddkolesnik.mailservice.repository.AppMessageRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,25 +23,25 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Сервис для работы с сообщениям пользователей системы
- *
  * @author Alexandr Stegnin
  */
-
+@Slf4j
 @Service
 @Transactional
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AppMessageService {
 
-  static String KOLESNIK_EMAIL;
+  static String kolesnikEmail;
 
   @Value("${spring.mail.kolesnik.username}")
   protected void setKolesnikEmail(String value) {
-    KOLESNIK_EMAIL = value;
+    kolesnikEmail = value;
   }
 
-  final SimpleMailMessage template;
+  final SimpleMailMessage welcomeMessageTemplate;
+
+  final SimpleMailMessage confirmMessageTemplate;
 
   final BCryptPasswordEncoder passwordEncoder;
 
@@ -66,9 +68,9 @@ public class AppMessageService {
   private void sendMessage(AppUser recipient) {
     String uuid = UUID.randomUUID().toString().substring(0, 8);
     AppMessage message = new AppMessage();
-    message.setSender(KOLESNIK_EMAIL);
+    message.setSender(kolesnikEmail);
     String password = passwordEncoder.encode(uuid);
-    String text = String.format(Objects.requireNonNull(template.getText()), recipient.getLogin(), uuid);
+    String text = String.format(Objects.requireNonNull(welcomeMessageTemplate.getText()), recipient.getLogin(), uuid);
     message.setUserId(recipient.getId());
     message.setText(text);
     message.setSubject("Добро пожаловать в Доходный Дом КолесникЪ!");
@@ -93,7 +95,7 @@ public class AppMessageService {
     AppUser user = appUserService.findById(message.getUserId());
     try {
       mailSender.sendWelcomeMessage(message.getSender(), user.getProfile().getEmail(),
-          message.getSubject(), message.getText(), "Доходный Дом Колесникъ");
+          message.getSubject(), message.getText(), "Доходный Дом КолесникЪ");
       message.setError(null);
     } catch (MessagingException | UnsupportedEncodingException e) {
       message.setError(e.getLocalizedMessage());
@@ -109,4 +111,22 @@ public class AppMessageService {
   public List<AppMessage> getNotSent() {
     return appMessageRepository.findByErrorNotNull();
   }
+
+  public void sendConfirmMessage(AppUserDTO dto) {
+    AppUser user = appUserService.findByEmail(dto.getEmail());
+    AppMessage message = new AppMessage();
+    message.setSender(kolesnikEmail);
+    String text = String.format(Objects.requireNonNull(confirmMessageTemplate.getText()), dto.getConfirmCode());
+    message.setUserId(user.getId());
+    message.setText(text);
+    message.setSubject("Код подтверждения");
+    try {
+      mailSender.sendConfirmMessage(message.getSender(), user.getProfile().getEmail(),
+          message.getSubject(), message.getText(), "ДД КолесникЪ");
+    } catch (MessagingException | UnsupportedEncodingException e) {
+      log.error(e.getLocalizedMessage());
+      message.setError(e.getLocalizedMessage());
+    }
+  }
+
 }
