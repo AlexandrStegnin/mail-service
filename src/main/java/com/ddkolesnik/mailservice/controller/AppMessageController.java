@@ -2,6 +2,7 @@ package com.ddkolesnik.mailservice.controller;
 
 import com.ddkolesnik.mailservice.config.annotation.ValidToken;
 import com.ddkolesnik.mailservice.dto.AppUserDTO;
+import com.ddkolesnik.mailservice.dto.MessageDTO;
 import com.ddkolesnik.mailservice.service.AppMessageService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,13 @@ public class AppMessageController {
                                  @RequestBody @Valid AppUserDTO userDTO) {
     appMessageService.sendConfirmMessage(userDTO);
     log.info("Сообщение успешно отправлено пользователю {}", userDTO);
+  }
+
+  @PostMapping(path = "/{token}/send/message", consumes = MediaType.APPLICATION_JSON_VALUE)
+  public void sendConfirmMessage(@PathVariable(name = "token") @ValidToken String token,
+                                 @RequestBody @Valid MessageDTO dto) {
+    appMessageService.sendMessage(dto);
+    log.info("Сообщение успешно отправлено.");
   }
 
 }

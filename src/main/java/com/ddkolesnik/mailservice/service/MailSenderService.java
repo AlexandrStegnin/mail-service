@@ -2,7 +2,9 @@ package com.ddkolesnik.mailservice.service;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -17,41 +19,46 @@ import java.nio.charset.StandardCharsets;
  *
  * @author Alexandr Stegnin
  */
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class MailSenderService {
 
-    JavaMailSender sender;
+  JavaMailSender sender;
 
-    private void sendMessage(String from, String to, String subject, String text, String personal, JavaMailSender sender) throws MessagingException, UnsupportedEncodingException {
-        MimeMessage message = sender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, false, StandardCharsets.UTF_8.name());
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(text, true);
-        helper.setFrom(from, personal);
-        sender.send(message);
-    }
+  private void sendMessage(String from, String to, String subject, String text, String personal, JavaMailSender sender) throws MessagingException, UnsupportedEncodingException {
+    MimeMessage message = sender.createMimeMessage();
+    MimeMessageHelper helper = new MimeMessageHelper(message, false, StandardCharsets.UTF_8.name());
+    helper.setTo(to);
+    helper.setSubject(subject);
+    helper.setText(text, true);
+    helper.setFrom(from, personal);
+    sender.send(message);
+  }
 
-    /**
-     * Отправка сообщения
-     *
-     * @param from - от кого
-     * @param to - кому
-     * @param subject - тема
-     * @param text - текст сообщения
-     * @param personal - отображаемое имя отправителя
-     * @throws MessagingException - при ошибке отправки сообщения
-     * @throws UnsupportedEncodingException - при ошибке отправителя сообщения
-     */
-    public void sendWelcomeMessage(String from, String to, String subject, String text, String personal) throws MessagingException, UnsupportedEncodingException {
-        sendMessage(from, to, subject, text, personal, sender);
-    }
+  /**
+   * Отправка сообщения
+   *
+   * @param from     - от кого
+   * @param to       - кому
+   * @param subject  - тема
+   * @param text     - текст сообщения
+   * @param personal - отображаемое имя отправителя
+   * @throws MessagingException           - при ошибке отправки сообщения
+   * @throws UnsupportedEncodingException - при ошибке отправителя сообщения
+   */
+  public void sendWelcomeMessage(String from, String to, String subject, String text, String personal) throws MessagingException, UnsupportedEncodingException {
+    sendMessage(from, to, subject, text, personal, sender);
+  }
 
-    public void sendConfirmMessage(String from, String to, String subject, String text, String personal) throws MessagingException, UnsupportedEncodingException {
-        sendMessage(from, to, subject, text, personal, sender);
-    }
+  public void sendConfirmMessage(String from, String to, String subject, String text, String personal) throws MessagingException, UnsupportedEncodingException {
+    sendMessage(from, to, subject, text, personal, sender);
+  }
+
+  @SneakyThrows
+  public void sendMessage(String from, String to, String subject, String text, String personal) {
+    sendMessage(from, to, subject, text, personal, sender);
+  }
 
 }

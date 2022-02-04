@@ -1,11 +1,12 @@
 package com.ddkolesnik.mailservice.service;
 
 import com.ddkolesnik.mailservice.dto.AppUserDTO;
+import com.ddkolesnik.mailservice.dto.MessageDTO;
 import com.ddkolesnik.mailservice.model.AppMessage;
 import com.ddkolesnik.mailservice.model.AppUser;
-import com.ddkolesnik.mailservice.repository.AppMessageRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -35,13 +35,13 @@ public class AppMessageService {
   @Value("${spring.mail.kolesnik.username}")
   String kolesnikEmail;
 
+  String kolesnikPersonal = "Колесник.Инвестиции";
+
   final SimpleMailMessage welcomeMessageTemplate;
 
   final SimpleMailMessage confirmMessageTemplate;
 
   final BCryptPasswordEncoder passwordEncoder;
-
-  final AppMessageRepository appMessageRepository;
 
   final AppUserService appUserService;
 
@@ -77,35 +77,8 @@ public class AppMessageService {
       message.setError(e.getLocalizedMessage());
     }
     message.setSentAt(LocalDateTime.now());
-    appMessageRepository.save(message);
     recipient.setPassword(password);
     appUserService.update(recipient);
-  }
-
-  /**
-   * Отправить приветственное сообщение пользователю
-   *
-   * @param message - сообщение
-   */
-  public void sendWelcomeMessage(AppMessage message) {
-    AppUser user = appUserService.findById(message.getUserId());
-    try {
-      mailSender.sendWelcomeMessage(message.getSender(), user.getProfile().getEmail(),
-          message.getSubject(), message.getText(), "Доходный Дом КолесникЪ");
-      message.setError(null);
-    } catch (MessagingException | UnsupportedEncodingException e) {
-      message.setError(e.getLocalizedMessage());
-    }
-    appMessageRepository.save(message);
-  }
-
-  /**
-   * Получить список сообщений, которые содержат ошибки и не отправлены
-   *
-   * @return - список сообщений
-   */
-  public List<AppMessage> getNotSent() {
-    return appMessageRepository.findByErrorNotNull();
   }
 
   public void sendConfirmMessage(AppUserDTO dto) {
@@ -122,6 +95,14 @@ public class AppMessageService {
     } catch (MessagingException | UnsupportedEncodingException e) {
       log.error(e.getLocalizedMessage());
       message.setError(e.getLocalizedMessage());
+    }
+  }
+
+  @SneakyThrows
+  public void sendMessage(MessageDTO message) {
+    for (String recipient : message.getRecipients()) {
+      AppUser user = appUserService.findByEmail(recipient);
+      mailSender.sendMessage(kolesnikEmail, user.getProfile().getEmail(), message.getSubject(), message.getText(), kolesnikPersonal);
     }
   }
 
