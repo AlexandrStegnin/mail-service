@@ -101,8 +101,8 @@ public class AppMessageService {
   @SneakyThrows
   public void sendMessage(MessageDTO message) {
     for (String recipient : message.getRecipients()) {
-      AppUser user = appUserService.findByEmail(recipient);
-      mailSender.sendMessage(kolesnikEmail, user.getProfile().getEmail(), message.getSubject(), message.getText(), kolesnikPersonal);
+      mailSender.sendMessage(kolesnikEmail, recipient, message.getSubject(), message.getText(), kolesnikPersonal);
+      log.info("Сообщение успешно отправлено {}", recipient);
     }
   }
 
